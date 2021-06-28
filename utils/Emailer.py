@@ -31,7 +31,7 @@ class Emailer():
         message = f"""
         <html>
             <body>
-                <p>{html_message}</p>
+                {html_message}
             </body>
         </html>
         """
