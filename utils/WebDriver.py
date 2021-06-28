@@ -23,7 +23,6 @@ class WebDriver():
             ex (Exception): exceptions raised by selenium
         """
         print(ex)
-        self.stop()
 
     def start(self):
         """start web driver application
