@@ -102,8 +102,6 @@ def run_interval(js, r1, r2, e):
         for email in r2.get_all_keys():
             e.send(email, 'Denison Student Jobs Updates', html_message)
 
-    js.stop()
-
 
 def main():
     js = JobScraper()
@@ -120,7 +118,10 @@ def main():
     e = Emailer()
 
     js.start()
-
     while True:
         run_interval(js, r1, r2, e)
         sleep(60)
+    js.stop()
+
+
+main()
