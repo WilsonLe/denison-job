@@ -68,7 +68,7 @@ def run_app(js, r1, r2, e):
 
         # send email to notify of removed jobs
         html_message = """
-        <h1>Some jobs have been removed!</h1>
+        <h1>Some student jobs have been removed!</h1>
         """
         for job in removed_jobs:
             html_message += f"""
@@ -88,7 +88,7 @@ def run_app(js, r1, r2, e):
 
         # send email to notify of added jobs
         html_message = """
-        <h1>Some jobs have been added!</h1>
+        <h1>Some student jobs have been added!</h1>
         """
         for job in added_jobs:
             html_message += f"""
@@ -110,7 +110,7 @@ def run_app(js, r1, r2, e):
 
         # send email to notify of added and removed jobs
         html_message = """
-        <h1>Some jobs have been added and removed!</h1> 
+        <h1>Some student jobs have been added and removed!</h1> 
         """
 
         html_message += """
