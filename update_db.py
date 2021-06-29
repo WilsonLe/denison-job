@@ -8,6 +8,10 @@ load_dotenv()
 
 
 def main():
+    """update database with current jobs on web app.
+    This is to avoid sending test email when resetting
+    redis database
+    """
     js = JobScraper()
     r1 = Redis(
         os.getenv('REDIS_HOST_1'),

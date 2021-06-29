@@ -1,19 +1,15 @@
 import smtplib
 import ssl
-import getpass
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-import os
-from dotenv import load_dotenv
-load_dotenv()
 
 
 class Emailer():
-    def __init__(self):
+    def __init__(self, email, pw):
         self.port = 465  # For SSL
         self.smtp_server = "smtp.gmail.com"
-        self.sender_email = os.getenv('MAIL_ADDRESS')
-        self.password = os.getenv('MAIL_PASS')
+        self.sender_email = email
+        self.password = pw
 
     def send(
             self,

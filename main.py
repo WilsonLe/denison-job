@@ -1,16 +1,46 @@
+from dotenv import load_dotenv
+import os
+from datetime import datetime
+from time import sleep
 from utils import Redis
 from utils import JobScraper
 from utils import Emailer
-from time import sleep
-
-import os
-from dotenv import load_dotenv
+import secrets
+from flask import Flask
+from flask import request
 load_dotenv()
 
 
-def run_interval(js, r1, r2, e):
+app = Flask(__name__)
+
+
+def shutdown_server():
+    func = request.environ.get('werkzeug.server.shutdown')
+    if func is None:
+        raise RuntimeError('Not running with the Werkzeug Server')
+    func()
+
+
+def run_app(js, r1, r2, e):
     if not js.logged_in():
-        js.login()
+        url_token = secrets.token_urlsafe(32)
+        HOST = os.getenv('HOST')
+        PORT = os.getenv('PORT')
+        url = f'{HOST}:{PORT}/{url_token}'
+
+        # notify admin
+        e.send(os.getenv('ADMIN_MAIL'),
+               'Denison Jobs Application Requires Login', url)
+
+        # wait admin click email link
+        @app.route(f"/{url_token}")
+        def admin_accept():
+            js.login()
+            shutdown_server()
+            return """\
+                <b>DONE</b>
+            """
+        app.run(host='0.0.0.0', port=os.getenv('PORT'))
 
     current_jobs = js.get_current_jobs()
     current_jobs_id = list(map(lambda job: job['uid'], current_jobs))
@@ -26,8 +56,9 @@ def run_interval(js, r1, r2, e):
     removed_jobs = list(filter(
         lambda job: job['uid'] in removed_jobs_id, previous_jobs))
 
-    print(f'added jobs: {added_jobs}')
-    print(f'removed jobs: {removed_jobs}')
+    print(datetime.now())
+    print(f'number of added jobs: {len(added_jobs)}')
+    print(f'number of removed jobs: {len(removed_jobs)}')
 
     if len(added_jobs) == 0 and len(removed_jobs) != 0:
 
@@ -106,6 +137,7 @@ def run_interval(js, r1, r2, e):
 
 
 def main():
+
     js = JobScraper()
     r1 = Redis(
         os.getenv('REDIS_HOST_1'),
@@ -117,12 +149,16 @@ def main():
         os.getenv('REDIS_PORT_2'),
         os.getenv('REDIS_PASS_2'),
         db=0)
-    e = Emailer()
+    e = Emailer(
+        os.getenv('MAIL_ADDRESS'),
+        os.getenv('MAIL_PASS'))
 
     js.start()
+
     while True:
-        run_interval(js, r1, r2, e)
+        run_app(js, r1, r2, e)
         sleep(60)
+
     js.stop()
 
 
