@@ -146,7 +146,7 @@ def main():
         db=0)
     r2 = Redis(
         os.getenv('REDIS_HOST_2'),
-        os.getenv('REDIS_PORT_2'),
+        os.getenv('REDISecho _PORT_2'),
         os.getenv('REDIS_PASS_2'),
         db=0)
     e = Emailer(
