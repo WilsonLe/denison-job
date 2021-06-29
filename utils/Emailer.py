@@ -35,11 +35,11 @@ class Emailer():
             </body>
         </html>
         """
-        message = MIMEMultipart("alternative")
-        message["Subject"] = subject
-        message["From"] = self.sender_email
-        message["To"] = receiver_email
-        message.attach(MIMEText(message, "html"))
+        email = MIMEMultipart("alternative")
+        email["Subject"] = subject
+        email["From"] = self.sender_email
+        email["To"] = receiver_email
+        email.attach(MIMEText(message, "html"))
 
         # Create a secure SSL context
         context = ssl.create_default_context()
@@ -47,4 +47,4 @@ class Emailer():
         with smtplib.SMTP_SSL(self.smtp_server, self.port, context=context) as server:
             server.login(self.sender_email, self.password)
             server.sendmail(self.sender_email, receiver_email,
-                            message.as_string())
+                            email.as_string())

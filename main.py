@@ -20,11 +20,11 @@ def run_interval(js, r1, r2, e):
 
     added_jobs_id = list(set(current_jobs_id) - set(previous_jobs_id))
     added_jobs = list(filter(
-        lambda job: job['uid'] in added_jobs_id, added_jobs_id))
+        lambda job: job['uid'] in added_jobs_id, current_jobs))
 
     removed_jobs_id = list(set(previous_jobs_id) - set(current_jobs_id))
     removed_jobs = list(filter(
-        lambda job: job['uid'] in added_jobs_id, removed_jobs_id))
+        lambda job: job['uid'] in removed_jobs_id, previous_jobs))
 
     print(f'added jobs: {added_jobs}')
     print(f'removed jobs: {removed_jobs}')
@@ -45,8 +45,9 @@ def run_interval(js, r1, r2, e):
                     <h3>{job['title']}, {job['department']}</h3>
                 </a>
             """
-        for email in r2.get_all_keys():
-            e.send(email, 'Denison Student Jobs Updates', html_message)
+
+        for address in r2.get_all_keys():
+            e.send(address, 'Denison Student Jobs Updates', html_message)
 
     elif len(added_jobs) != 0 and len(removed_jobs) == 0:
 
@@ -64,8 +65,9 @@ def run_interval(js, r1, r2, e):
                     <h3>{job['title']}, {job['department']}</h3>
                 </a>
             """
-        for email in r2.get_all_keys():
-            e.send(email, 'Denison Student Jobs Updates', html_message)
+
+        for address in r2.get_all_keys():
+            e.send(address, 'Denison Student Jobs Updates', html_message)
 
     elif len(added_jobs) != 0 and len(removed_jobs) != 0:
 
@@ -99,8 +101,8 @@ def run_interval(js, r1, r2, e):
                     <h3>{job['title']}, {job['department']}</h3>
                 </a>
             """
-        for email in r2.get_all_keys():
-            e.send(email, 'Denison Student Jobs Updates', html_message)
+        for address in r2.get_all_keys():
+            e.send(address, 'Denison Student Jobs Updates', html_message)
 
 
 def main():
