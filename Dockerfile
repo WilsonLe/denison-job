@@ -9,6 +9,7 @@ COPY . .
 # INSTALL SYSTEM DEPENDENCIES
 RUN apt-get update && apt-get install -y \
 	sudo \
+	wget \
 	build-essential \
 	ibglib2.0-dev \
 	libcap2-bin \
@@ -27,7 +28,7 @@ RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub |      ap
     && echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list \
     && apt-get update -qqy \
     && apt-get -qqy install \
-    ${CHROME_VERSION:-google-chrome-stable} \
+        ${CHROME_VERSION:-google-chrome-stable} \
     && rm /etc/apt/sources.list.d/google-chrome.list \
     && rm -rf /var/lib/apt/lists/* /var/cache/apt/*
 
