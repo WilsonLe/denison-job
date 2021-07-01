@@ -13,19 +13,19 @@ services:
 
   denison-jobs:
     container_name: denison-jobs
-    command: redis-server /usr/local/etc/redis/redis.conf
+    command: redis-server /data/denison-jobs/redis.conf
     image: redis
     ports:
       - "7346:7346"
     volumes:
-      - ${PWD}/redis:/usr/local/etc/redis/
+      - ${PWD}/redis:/data/denison-jobs/
 
   denison-jobs-emails:
     container_name: denison-jobs-emails
-    command: redis-server /usr/local/etc/redis/redis.conf
+    command: redis-server /data/denison-jobs-emails/redis.conf
     image: redis
     ports:
       - "7347:7347"
     volumes:
-      - ${PWD}/redis:/usr/local/etc/redis/
+      - ${PWD}/redis:/data/denison-jobs-emails/
   
