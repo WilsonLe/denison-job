@@ -25,7 +25,7 @@ RUN python3 -m venv venv \
     && venv/bin/pip install -r requirements.txt 
 
 RUN wget --no-check-certificate -qO - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add - \
-    && sudo echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list \
+    && sudo echo "deb https://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list \
     && apt-get update -qqy \
     && apt-get -qqy install google-chrome-stable \
     && rm /etc/apt/sources.list.d/google-chrome.list \
