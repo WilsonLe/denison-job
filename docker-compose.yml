@@ -18,7 +18,7 @@ services:
     ports:
       - "7346:7346"
     volumes:
-      - ${PWD}/redis:/data/denison-jobs/
+      - ${PWD}/redis/redis.conf:/data/denison-jobs/redis.conf
 
   denison-jobs-emails:
     container_name: denison-jobs-emails
@@ -27,5 +27,5 @@ services:
     ports:
       - "7347:7347"
     volumes:
-      - ${PWD}/redis:/data/denison-jobs-emails/
+      - ${PWD}/redis/redis.conf:/data/denison-jobs-emails/redis.conf
   
