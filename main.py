@@ -1,27 +1,21 @@
+from flask import request
+from flask import Flask
+import secrets
+from utils import Emailer
+from utils import JobScraper
+from utils import Redis
 from dotenv import load_dotenv
 import os
 from datetime import datetime
 from time import sleep
-from utils import Redis
-from utils import JobScraper
-from utils import Emailer
-import secrets
-from flask import Flask
-from flask import request
+import multiprocessing
+from multiprocessing import Process
+multiprocessing.set_start_method("fork")
 load_dotenv()
 
 
-app = Flask(__name__)
+def run_app(js, r1, r2, e, sv, app):
 
-
-def shutdown_server():
-    func = request.environ.get('werkzeug.server.shutdown')
-    if func is None:
-        raise RuntimeError('Not running with the Werkzeug Server')
-    func()
-
-
-def run_app(js, r1, r2, e):
     if not js.logged_in():
         url_token = secrets.token_urlsafe(32)
         HOST = os.getenv('HOST')
@@ -36,11 +30,12 @@ def run_app(js, r1, r2, e):
         @app.route(f"/{url_token}")
         def admin_accept():
             js.login()
-            shutdown_server()
+            sv.terminate()
+            sv.join()
             return """\
                 <b>DONE</b>
             """
-        app.run(host='0.0.0.0', port=os.getenv('PORT'))
+        sv.start()
 
     current_jobs = js.get_current_jobs()
     current_jobs_id = list(map(lambda job: job['uid'], current_jobs))
@@ -110,7 +105,7 @@ def run_app(js, r1, r2, e):
 
         # send email to notify of added and removed jobs
         html_message = """
-        <h1>Some student jobs have been added and removed!</h1> 
+        <h1>Some student jobs have been added and removed!</h1>
         """
 
         html_message += """
@@ -137,7 +132,6 @@ def run_app(js, r1, r2, e):
 
 
 def main():
-
     js = JobScraper()
     r1 = Redis(
         os.getenv('REDIS_HOST_1'),
@@ -152,11 +146,13 @@ def main():
     e = Emailer(
         os.getenv('MAIL_ADDRESS'),
         os.getenv('MAIL_PASS'))
+    app = Flask(__name__)
+    sv = Process(target=app.run, args=(''))
 
     js.start()
 
     while True:
-        run_app(js, r1, r2, e)
+        run_app(js, r1, r2, e, sv, app)
         sleep(60)
 
     js.stop()

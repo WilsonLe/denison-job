@@ -1,0 +1,31 @@
+version: "3.9"
+   
+services:
+  web:
+    container_name: denison-jobs-app
+    build: .
+    command: venv/bin/python main.py
+    ports:
+      - "7345:7345"
+    depends_on:
+      - denison-jobs
+      - denison-jobs-emails
+
+  denison-jobs:
+    container_name: denison-jobs
+    command: bash -c "redis-server ./redis.conf"
+    image: redis
+    ports:
+      - "7346:7346"
+    volumes:
+      - /data/denison-jobs-app:/redis/denison-jobs
+
+  denison-jobs-emails:
+    container_name: denison-jobs-emails
+    command: bash -c "redis-server ./redis.conf"
+    image: redis
+    ports:
+      - "7347:7347"
+    volumes:
+      - /data/denison-jobs-app:/redis/denison-jobs-emails
+  

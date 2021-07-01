@@ -37,4 +37,4 @@ RUN wget https://chromedriver.storage.googleapis.com/91.0.4472.101/chromedriver_
 
 EXPOSE 7345
 
-CMD ["venv/bin/python", "main.py"]
+CMD ["venv/bin/python", "main.py"]  

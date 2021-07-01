@@ -30,8 +30,13 @@ class Redis():
             password=self.PASSWORD,
             charset=self.CHARSET,
             errors=self.ERRORS)
-        print('connected to redis server')
-        return client
+
+        try:
+            client.ping()
+            print('connected to redis server')
+            return client
+        except Exception as e:
+            raise e
 
     def set_key(self, key, value):
         """set key value pair to database
