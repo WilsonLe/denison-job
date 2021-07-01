@@ -12,6 +12,7 @@ load_dotenv()
 class WebDriver():
     def __init__(self):
         self.options = Options()
+        self.options.add_argument('--no-sandbox')
         if os.getenv("PYTHON_ENV") == "production":
             self.options.add_argument('--headless')
         self.driver = None
