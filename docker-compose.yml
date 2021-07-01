@@ -13,19 +13,19 @@ services:
 
   denison-jobs:
     container_name: denison-jobs
-    command: bash -c "redis-server ./redis.conf"
+    command: redis-server /usr/local/etc/redis/redis.conf
     image: redis
     ports:
       - "7346:7346"
     volumes:
-      - ./redis.conf:/usr/local/etc/redis/redis.conf
+      - ${PWD}/redis.conf:/usr/local/etc/redis/redis.conf
 
   denison-jobs-emails:
     container_name: denison-jobs-emails
-    command: bash -c "redis-server ./redis.conf"
+    command: redis-server /usr/local/etc/redis/redis.conf
     image: redis
     ports:
       - "7347:7347"
     volumes:
-      - ./redis.conf:/usr/local/etc/redis/redis.conf
+      - ${PWD}/redis.conf:/usr/local/etc/redis/redis.conf
   
