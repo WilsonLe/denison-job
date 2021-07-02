@@ -35,6 +35,8 @@ RUN wget https://chromedriver.storage.googleapis.com/91.0.4472.101/chromedriver_
     && unzip chromedriver_linux64.zip \
 	&& mv /app/chromedriver /usr/bin
 
+ENV PYTHON_ENV production
+
 EXPOSE 7345
 
 CMD ["venv/bin/python", "main.py"]  

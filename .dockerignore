@@ -1,5 +1,9 @@
 venv
-.env
-*.conf
+
+*.env
 .vscode
+.git
+.cache
+.md
+
 __pycache__

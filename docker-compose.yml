@@ -1,31 +1,34 @@
 version: "3.9"
    
 services:
+
   web:
     container_name: denison-jobs-app
     build: .
     command: venv/bin/python main.py
     ports:
       - "7345:7345"
+    environment: 
+      - REDIS_URL_1=redis://denison-jobs
+      - REDIS_URL_2=redis://denison-jobs-emails
     depends_on:
       - denison-jobs
       - denison-jobs-emails
 
   denison-jobs:
     container_name: denison-jobs
-    command: redis-server /data/denison-jobs/redis.conf
     image: redis
-    ports:
-      - "7346:7346"
-    volumes:
-      - ${PWD}/redis/redis.conf:/data/denison-jobs/redis.conf
+    expose: 
+      - "7346"
 
   denison-jobs-emails:
     container_name: denison-jobs-emails
-    command: redis-server /data/denison-jobs-emails/redis.conf
     image: redis
-    ports:
-      - "7347:7347"
-    volumes:
-      - ${PWD}/redis/redis.conf:/data/denison-jobs-emails/redis.conf
-  
+    expose:
+      - "7347"
+
+# secrets:                        # top level secrets block
+#   mail_address:
+#     file: true
+#   mail_pw:
+#     file: my_file_secret.txt

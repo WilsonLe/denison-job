@@ -134,20 +134,20 @@ def run_app(js, r1, r2, e, sv, app):
 def main():
     js = JobScraper()
     r1 = Redis(
+        os.getenv('REDIS_URL_1'),
         os.getenv('REDIS_HOST_1'),
         os.getenv('REDIS_PORT_1'),
-        os.getenv('REDIS_PASS_1'),
-        db=0)
+        os.getenv('REDIS_PASS_1'))
     r2 = Redis(
+        os.getenv('REDIS_URL_2'),
         os.getenv('REDIS_HOST_2'),
-        os.getenv('REDISecho _PORT_2'),
-        os.getenv('REDIS_PASS_2'),
-        db=0)
+        os.getenv('REDIS _PORT_2'),
+        os.getenv('REDIS_PASS_2'))
     e = Emailer(
         os.getenv('MAIL_ADDRESS'),
         os.getenv('MAIL_PASS'))
     app = Flask(__name__)
-    sv = Process(target=app.run, args=(''))
+    sv = Process(target=app.run)
 
     js.start()
 

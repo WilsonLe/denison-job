@@ -6,12 +6,29 @@ load_dotenv()
 
 
 class Redis():
-    def __init__(self, host, port, password, db=0, decode_response=True):
+    def __init__(
+            self,
+            url=None,
+            host=None,
+            port=None,
+            password=None):
+        """initiate Redis client
+
+        Args:
+            url (str, optional): direct url to connect.
+            If not specified, require host-based connection.
+            host (str, optional): hostname.
+            port (int, optional): port number.
+            password (str, optional): password, if required.
+        """
+        if url == None:
+            if host == None or port == None:
+                raise ValueError(
+                    'You must specify host and port if url is not specified')
+        self.URL = url
         self.HOST = host
         self.PORT = port
         self.PASSWORD = password
-        self.DB = db
-        self.DECODE_REPONSE = decode_response
         self.CHARSET = 'utf-8'
         self.ERRORS = 'strict'
 
@@ -23,14 +40,18 @@ class Redis():
         Returns:
             redis.client.Redis: Redis client that is connected to redis server
         """
-        client = redis.StrictRedis(
-            host=self.HOST,
-            port=self.PORT,
-            db=self.DB,
-            password=self.PASSWORD,
-            charset=self.CHARSET,
-            errors=self.ERRORS)
-
+        if self.URL != None:
+            client = redis.StrictRedis.from_url(
+                self.URL,
+                charset=self.CHARSET,
+                errors=self.ERRORS)
+        else:
+            client = redis.StrictRedis(
+                host=self.HOST,
+                port=self.PORT,
+                password=self.PASSWORD,
+                charset=self.CHARSET,
+                errors=self.ERRORS)
         try:
             client.ping()
             print('connected to redis server')
