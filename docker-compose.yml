@@ -8,9 +8,11 @@ services:
     command: venv/bin/python main.py
     ports:
       - "7345:7345"
+    env_file: 
+      - app.env
     environment: 
-      - REDIS_URL_1=redis://denison-jobs
-      - REDIS_URL_2=redis://denison-jobs-emails
+      - PYTHON_ENV=production
+
     depends_on:
       - denison-jobs
       - denison-jobs-emails
@@ -26,9 +28,3 @@ services:
     image: redis
     expose:
       - "7347"
-
-# secrets:                        # top level secrets block
-#   mail_address:
-#     file: true
-#   mail_pw:
-#     file: my_file_secret.txt

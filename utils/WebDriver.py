@@ -24,7 +24,7 @@ class WebDriver():
         Args:
             ex (Exception): exceptions raised by selenium
         """
-        print(ex)
+        raise ex
 
     def start(self):
         """start web driver application
@@ -32,7 +32,7 @@ class WebDriver():
         try:
             self.driver = webdriver.Chrome(options=self.options)
         except Exception as ex:
-            print(ex)
+            raise ex
 
     def stop(self):
         """stop web driver application

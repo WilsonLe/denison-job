@@ -147,7 +147,7 @@ def main():
         os.getenv('MAIL_ADDRESS'),
         os.getenv('MAIL_PASS'))
     app = Flask(__name__)
-    sv = Process(target=app.run)
+    sv = Process(target=app.run, args=('0.0.0.0', os.getenv('PORT')))
 
     js.start()
 
@@ -158,4 +158,5 @@ def main():
     js.stop()
 
 
-main()
+if __name__ == "__main__":
+    main()
