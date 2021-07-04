@@ -9,14 +9,17 @@ services:
     ports:
       - "7345:7345"
     env_file: 
-      - app.env
+      - .env
     environment: 
       - PYTHON_ENV=production
+      - REDIS_URL_1=redis://denison-jobs
+      - REDIS_URL_2=redis://denison-jobs-emails
 
     depends_on:
       - denison-jobs
       - denison-jobs-emails
-
+    stop_signal: SIGINT
+    
   denison-jobs:
     container_name: denison-jobs
     image: redis

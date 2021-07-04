@@ -1,5 +1,5 @@
 from flask import Flask, request, redirect, url_for
-
+import socket
 from utils import Emailer, JobScraper, Redis
 
 import secrets
@@ -7,22 +7,19 @@ import os
 from datetime import datetime
 from dotenv import load_dotenv
 from time import sleep
-import multiprocessing
-multiprocessing.set_start_method("fork")
+import multiprocessing as mp
+mp.set_start_method("fork")
 load_dotenv()
 
 
-def run_app(js, r1, r2, e):
-
+def run_app(js, e, r1, r2):
     if not js.logged_in():
         url_token = secrets.token_urlsafe(32)
-        start_shutdown_listener_process = multiprocessing.Process(
-            target=admin_response_listener, args=(url_token, js))
-        start_shutdown_listener_process.start()
         notify_admin(url_token, e)
-        start_shutdown_listener_process.join()
-
-    print('exit login check')
+        p = mp.Process(target=start_admin_listener, args=(url_token, js))
+        p.start()
+        # TODO: write external script to get system 0.0.0.0 ip address, then parse into url to send in email
+        p.join()
     current_jobs = js.get_current_jobs()
     current_jobs_id = list(map(lambda job: job['uid'], current_jobs))
 
@@ -116,7 +113,7 @@ def run_app(js, r1, r2, e):
         for address in r2.get_all_keys():
             e.send(address, 'Denison Student Jobs Updates', html_message)
 
-    sleep(60)
+    sleep(int(os.getenv('INTERVAL')))
 
 
 def notify_admin(url_token, e):
@@ -125,11 +122,15 @@ def notify_admin(url_token, e):
     url = f'{HOST}:{PORT}/{url_token}'
     e.send(os.getenv('ADMIN_MAIL'),
            'Denison Jobs Application Requires Login', url)
-    print('EMAIL SENT')
 
 
-def admin_response_listener(url_token, js):
+def start_admin_listener(url_token, js):
     app = Flask(__name__)
+
+    @app.route("/ip")
+    def host_ip():
+        print(request.url_root)
+        return "HI"
 
     @app.route(f"/{url_token}")
     def login_then_shutdown():
@@ -147,6 +148,7 @@ def admin_response_listener(url_token, js):
 
 
 def main():
+
     js = JobScraper()
     r1 = Redis(
         os.getenv('REDIS_URL_1'),
@@ -156,16 +158,14 @@ def main():
     r2 = Redis(
         os.getenv('REDIS_URL_2'),
         os.getenv('REDIS_HOST_2'),
-        os.getenv('REDIS _PORT_2'),
+        os.getenv('REDIS_PORT_2'),
         os.getenv('REDIS_PASS_2'))
     e = Emailer(
         os.getenv('MAIL_ADDRESS'),
         os.getenv('MAIL_PASS'))
-
     js.start()
-
     while True:
-        run_app(js, r1, r2, e)
+        run_app(js, e, r1, r2)
 
     js.stop()
 

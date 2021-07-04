@@ -17,6 +17,7 @@ class JobScraper(WebDriver):
     def login(self):
         """Login to my denison. Assume driver has already started.
         """
+
         self.go_to('my.denison.edu')
         self.query_selector('#username').send_keys(os.getenv('US'))
         self.query_selector('#password').send_keys(os.getenv('PW'))
