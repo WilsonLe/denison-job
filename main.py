@@ -1,42 +1,28 @@
-from flask import request
-from flask import Flask
+from flask import Flask, request, redirect, url_for
+
+from utils import Emailer, JobScraper, Redis
+
 import secrets
-from utils import Emailer
-from utils import JobScraper
-from utils import Redis
-from dotenv import load_dotenv
 import os
 from datetime import datetime
+from dotenv import load_dotenv
 from time import sleep
 import multiprocessing
-from multiprocessing import Process
 multiprocessing.set_start_method("fork")
 load_dotenv()
 
 
-def run_app(js, r1, r2, e, sv, app):
+def run_app(js, r1, r2, e):
 
     if not js.logged_in():
         url_token = secrets.token_urlsafe(32)
-        HOST = os.getenv('HOST')
-        PORT = os.getenv('PORT')
-        url = f'{HOST}:{PORT}/{url_token}'
+        start_shutdown_listener_process = multiprocessing.Process(
+            target=admin_response_listener, args=(url_token, js))
+        start_shutdown_listener_process.start()
+        notify_admin(url_token, e)
+        start_shutdown_listener_process.join()
 
-        # notify admin
-        e.send(os.getenv('ADMIN_MAIL'),
-               'Denison Jobs Application Requires Login', url)
-
-        # wait admin click email link
-        @app.route(f"/{url_token}")
-        def admin_accept():
-            js.login()
-            sv.terminate()
-            sv.join()
-            return """\
-                <b>DONE</b>
-            """
-        sv.start()
-
+    print('exit login check')
     current_jobs = js.get_current_jobs()
     current_jobs_id = list(map(lambda job: job['uid'], current_jobs))
 
@@ -130,6 +116,35 @@ def run_app(js, r1, r2, e, sv, app):
         for address in r2.get_all_keys():
             e.send(address, 'Denison Student Jobs Updates', html_message)
 
+    sleep(60)
+
+
+def notify_admin(url_token, e):
+    HOST = os.getenv('HOST')
+    PORT = os.getenv('PORT')
+    url = f'{HOST}:{PORT}/{url_token}'
+    e.send(os.getenv('ADMIN_MAIL'),
+           'Denison Jobs Application Requires Login', url)
+    print('EMAIL SENT')
+
+
+def admin_response_listener(url_token, js):
+    app = Flask(__name__)
+
+    @app.route(f"/{url_token}")
+    def login_then_shutdown():
+        try:
+            js.login()
+            func = request.environ.get('werkzeug.server.shutdown')
+            if func is None:
+                raise RuntimeError('Not running with the Werkzeug Server')
+            func()
+            return "DONE"
+        except Exception as e:
+            return e
+
+    app.run('0.0.0.0', os.getenv('PORT'))
+
 
 def main():
     js = JobScraper()
@@ -146,14 +161,11 @@ def main():
     e = Emailer(
         os.getenv('MAIL_ADDRESS'),
         os.getenv('MAIL_PASS'))
-    app = Flask(__name__)
-    sv = Process(target=app.run, args=('0.0.0.0', os.getenv('PORT')))
 
     js.start()
 
     while True:
-        run_app(js, r1, r2, e, sv, app)
-        sleep(60)
+        run_app(js, r1, r2, e)
 
     js.stop()
 
