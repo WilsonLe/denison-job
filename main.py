@@ -4,9 +4,11 @@ from utils import Emailer, JobScraper, Redis
 
 import secrets
 import os
+import sys
 from datetime import datetime
 from dotenv import load_dotenv
 from time import sleep
+import threading as thr
 import multiprocessing as mp
 mp.set_start_method("fork")
 load_dotenv()
@@ -16,10 +18,20 @@ def run_app(js, e, r1, r2):
     if not js.logged_in():
         url_token = secrets.token_urlsafe(32)
         notify_admin(url_token, e)
-        p = mp.Process(target=start_admin_listener, args=(url_token, js))
+        admin_accept = mp.Event()
+        p = mp.Process(target=start_admin_listener,
+                       args=(url_token, admin_accept, js))
+
         p.start()
         # TODO: write external script to get system 0.0.0.0 ip address, then parse into url to send in email
+        admin_accept.wait()
+        print("admin accepted")
+        sys.stdout.flush()
+        p.terminate()
         p.join()
+
+    print('exit login check')
+    sys.stdout.flush()
     current_jobs = js.get_current_jobs()
     current_jobs_id = list(map(lambda job: job['uid'], current_jobs))
 
@@ -37,6 +49,7 @@ def run_app(js, e, r1, r2):
     print(datetime.now())
     print(f'number of added jobs: {len(added_jobs)}')
     print(f'number of removed jobs: {len(removed_jobs)}')
+    sys.stdout.flush()
 
     if len(added_jobs) == 0 and len(removed_jobs) != 0:
 
@@ -122,24 +135,25 @@ def notify_admin(url_token, e):
     url = f'{HOST}:{PORT}/{url_token}'
     e.send(os.getenv('ADMIN_MAIL'),
            'Denison Jobs Application Requires Login', url)
+    print("Email sent")
+    sys.stdout.flush()
 
 
-def start_admin_listener(url_token, js):
+def start_admin_listener(url_token, admin_accept, js):
     app = Flask(__name__)
-
-    @app.route("/ip")
-    def host_ip():
-        print(request.url_root)
-        return "HI"
 
     @app.route(f"/{url_token}")
     def login_then_shutdown():
         try:
             js.login()
-            func = request.environ.get('werkzeug.server.shutdown')
-            if func is None:
-                raise RuntimeError('Not running with the Werkzeug Server')
-            func()
+            sys.stdout.flush()
+            thr.Timer(2.0, lambda: admin_accept.set()).start()
+
+            # func = request.environ.get('werkzeug.server.shutdown')
+            # if func is None:
+            #     raise RuntimeError('Not running with the Werkzeug Server')
+            # func()
+
             return "DONE"
         except Exception as e:
             return e

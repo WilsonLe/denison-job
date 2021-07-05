@@ -16,8 +16,7 @@ def main():
     r1 = Redis(
         os.getenv('REDIS_HOST_1'),
         os.getenv('REDIS_PORT_1'),
-        os.getenv('REDIS_PASS_1'),
-        db=0)
+        os.getenv('REDIS_PASS_1'))
     js.start()
     if not js.logged_in():
         js.login()

@@ -79,3 +79,6 @@ class JobScraper(WebDriver):
             })
 
         return fetched_jobs
+
+
+
