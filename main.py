@@ -23,7 +23,6 @@ def run_app(js, e, r1, r2):
                        args=(url_token, admin_accept, js))
 
         p.start()
-        # TODO: write external script to get system 0.0.0.0 ip address, then parse into url to send in email
         admin_accept.wait()
         print("admin accepted")
         sys.stdout.flush()
@@ -70,7 +69,8 @@ def run_app(js, e, r1, r2):
 
         for address in r2.get_all_keys():
             e.send(address, 'Denison Student Jobs Updates', html_message)
-
+        print('Notified users')
+        sys.stdout.flush()
     elif len(added_jobs) != 0 and len(removed_jobs) == 0:
 
         # add keys to db
@@ -90,7 +90,8 @@ def run_app(js, e, r1, r2):
 
         for address in r2.get_all_keys():
             e.send(address, 'Denison Student Jobs Updates', html_message)
-
+        print('Notified users')
+        sys.stdout.flush()
     elif len(added_jobs) != 0 and len(removed_jobs) != 0:
 
         # add and remove keys from db
@@ -125,7 +126,8 @@ def run_app(js, e, r1, r2):
             """
         for address in r2.get_all_keys():
             e.send(address, 'Denison Student Jobs Updates', html_message)
-
+        print('Notified users')
+        sys.stdout.flush()
     sleep(int(os.getenv('INTERVAL')))
 
 
