@@ -54,7 +54,7 @@ def run_app(js, e, r1, r2):
 
         # remove keys from db
         for removed_job in removed_jobs:
-            r1.del_key(removed_job['uid'])
+            r1.del_key(str(removed_job['uid']))
 
         # send email to notify of removed jobs
         html_message = """
@@ -98,7 +98,7 @@ def run_app(js, e, r1, r2):
         for added_job in added_jobs:
             r1.set_key(added_job['uid'], added_job)
         for removed_job in removed_jobs:
-            r1.del_key(removed_job['uid'])
+            r1.del_key(str(removed_job['uid']))
 
         # send email to notify of added and removed jobs
         html_message = """

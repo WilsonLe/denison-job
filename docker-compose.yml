@@ -1,33 +1,30 @@
 version: "3.9"
-   
 services:
-
-  web:
-    container_name: denison-jobs-app
-    build: .
-    command: venv/bin/python main.py
-    ports:
-      - "7345:7345"
-    env_file: 
-      - .env
-    environment: 
-      - PYTHON_ENV=production
-      - REDIS_URL_1=redis://denison-jobs
-      - REDIS_URL_2=redis://denison-jobs-emails
-
-    depends_on:
-      - denison-jobs
-      - denison-jobs-emails
-    stop_signal: SIGINT
-    
-  denison-jobs:
-    container_name: denison-jobs
-    image: redis
-    expose: 
-      - "7346"
-
-  denison-jobs-emails:
-    container_name: denison-jobs-emails
-    image: redis
-    expose:
-      - "7347"
+    web:
+        container_name: denison-jobs-app
+        build: .
+        command: venv/bin/python main.py
+        ports:
+            - "7345:7345"
+        env_file: 
+            - .env
+        environment: 
+            - PYTHON_ENV=production
+            - REDIS_URL_1=redis://denison-jobs
+            - REDIS_URL_2=redis://denison-jobs-emails
+        restart: always
+        depends_on:
+            - denison-jobs
+            - denison-jobs-emails   
+    denison-jobs:
+        container_name: denison-jobs
+        build: ./redis/denison-jobs
+        volumes: 
+            - ./redis/denison-jobs/data:/data
+        restart: always
+    denison-jobs-emails:
+        container_name: denison-jobs-emails
+        build: ./redis/denison-jobs-emails
+        volumes: 
+            - ./redis/denison-jobs-emails/data:/data
+        restart: always

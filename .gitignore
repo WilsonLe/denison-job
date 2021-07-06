@@ -1,6 +1,10 @@
 # Config files
 *.conf
 
+# Redis data
+*.aof
+*.rdb
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
