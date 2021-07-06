@@ -1,5 +1,6 @@
 # Config files
-*.conf
+#*.conf
+# need to allow config file to be in server. No secrets stored there anyway.
 
 # Redis data
 *.aof
