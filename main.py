@@ -1,7 +1,7 @@
 from flask import Flask, request, redirect, url_for
-import socket
+from selenium.common.exceptions import NoSuchWindowException
 from utils import Emailer, JobScraper, Redis
-
+from datetime import datetime
 import secrets
 import os
 import sys
@@ -20,7 +20,7 @@ def run_app(js, e, r1, r2):
         notify_admin(url_token, e)
         admin_accept = mp.Event()
         p = mp.Process(target=start_admin_listener,
-                       args=(url_token, admin_accept, js))
+                       args=(url_token, admin_accept, js, e))
 
         p.start()
         admin_accept.wait()
@@ -141,7 +141,7 @@ def notify_admin(url_token, e):
     sys.stdout.flush()
 
 
-def start_admin_listener(url_token, admin_accept, js):
+def start_admin_listener(url_token, admin_accept, js, e):
     app = Flask(__name__)
 
     @app.route(f"/{url_token}")
@@ -150,16 +150,22 @@ def start_admin_listener(url_token, admin_accept, js):
             js.login()
             sys.stdout.flush()
             thr.Timer(2.0, lambda: admin_accept.set()).start()
-
-            # func = request.environ.get('werkzeug.server.shutdown')
-            # if func is None:
-            #     raise RuntimeError('Not running with the Werkzeug Server')
-            # func()
-
             return "DONE"
-        except Exception as e:
-            return e
-
+        except NoSuchWindowException as ex:
+            with open('exceptions.txt', 'w') as f:
+                f.wirte(datetime.now())
+                f.write(ex)
+            js.start()
+            js.login()
+            sys.stdout.flush()
+            thr.Timer(2.0, lambda: admin_accept.set()).start()
+            return "DONE"
+        except Exception as ex:
+            with open('exceptions.txt', 'w') as f:
+                f.wirte(datetime.now())
+                f.write(ex)
+            e.send(os.getenv('ADMIN_MAIL'),
+                   'Denison Job Exception Occured', ex)
     app.run('0.0.0.0', os.getenv('PORT'))
 
 
@@ -184,6 +190,7 @@ def main():
         run_app(js, e, r1, r2)
 
     js.stop()
+    print('APPLICATION STOPPED')
 
 
 if __name__ == "__main__":
