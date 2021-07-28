@@ -162,7 +162,7 @@ def start_admin_listener(url_token, admin_accept, js, e):
             return "DONE"
         except Exception as ex:
             with open('exceptions.txt', 'w') as f:
-                f.wirte(datetime.now())
+                f.write(datetime.now())
                 f.write(ex)
             e.send(os.getenv('ADMIN_MAIL'),
                    'Denison Job Exception Occured', ex)
