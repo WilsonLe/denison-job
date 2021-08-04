@@ -13,21 +13,45 @@ import multiprocessing as mp
 mp.set_start_method("fork")
 load_dotenv()
 
+class Process(mp.Process):
+    def __init__(self, *args, **kwargs):
+        mp.Process.__init__(self, *args, **kwargs)
+        self._pconn, self._cconn = mp.Pipe()
+        self._exception = None
+ 
+    def run(self):
+        try:
+            mp.Process.run(self)
+            self._cconn.send(None)
+        except Exception as e:
+            tb = traceback.format_exc()
+            self._cconn.send((e, tb))
+ 
+    @property
+    def exception(self):
+        if self._pconn.poll():
+            self._exception = self._pconn.recv()
+        return self._exception
 
 def run_app(js, e, r1, r2):
     if not js.logged_in():
         url_token = secrets.token_urlsafe(32)
         notify_admin(url_token, e)
-        admin_accept = mp.Event()
-        p = mp.Process(target=start_admin_listener,
-                       args=(url_token, admin_accept, js, e))
 
-        p.start()
+        parent_conn, child_conn = mp.Pipe()
+        admin_accept = mp.Event()
+        child_process = Process(target=start_admin_listener,
+                       args=(url_token, admin_accept, js, e, child_conn))
+
+        child_process.start()
         admin_accept.wait()
         print("admin accepted")
         sys.stdout.flush()
-        p.terminate()
-        p.join()
+        child_process.join()
+        if child_process.exception:
+            error, traceback = child_process.exception
+            raise error
+            child_process.terminate()
 
     print('exit login check')
     sys.stdout.flush()
